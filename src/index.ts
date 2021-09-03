@@ -17,4 +17,4 @@
 //   () => {}
 // );
 
-export * from "./spotifyConnect";
+export { SpotifyConnect } from "./spotifyConnect";

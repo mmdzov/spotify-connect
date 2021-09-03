@@ -1,5 +1,5 @@
-import { NewTokenCallback } from "../global";
-import { ConfigPath, NewTokenData, Scope } from "../global";
+import { NewTokenCallback } from "./global";
+import { ConfigPath, NewTokenData, Scope } from "./global";
 import urlEncode from "urlencode";
 import express from "express";
 import { encode } from "js-base64";
@@ -7,7 +7,7 @@ import axios from "axios";
 import open from "open";
 import http from "http";
 
-class SpotifyConnect {
+export class SpotifyConnect {
   /**
    *
    * @param {string} client_id When you register your application, Spotify provides you a Client ID
@@ -125,5 +125,3 @@ class SpotifyConnect {
       }, 3550 * 1000);
   }
 }
-
-export default SpotifyConnect;

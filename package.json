@@ -1,8 +1,8 @@
 {
   "name": "spotify-connect",
-  "version": "0.0.3",
+  "version": "0.0.9",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/index.ts",
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build"
@@ -21,7 +21,8 @@
     "url": "git+https://github.com/mmdzov/spotify-connect.git"
   },
   "author": "mmdzov",
-  "types": "dist/index.d.ts",
+  "types": "dist/global.d.ts",
+  "typings": "dist/global.d.ts",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
