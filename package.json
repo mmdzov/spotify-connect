@@ -4,8 +4,7 @@
   "description": "",
   "main": "dist/index.ts",
   "scripts": {
-    "build": "tsc",
-    "prepare": "npm run build"
+    "start": "nodemon src/index.ts"
   },
   "keywords": [
     "spotify",

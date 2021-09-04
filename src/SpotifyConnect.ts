@@ -1,5 +1,5 @@
-import { NewTokenCallback } from "./global";
-import { ConfigPath, NewTokenData, Scope } from "./global";
+import { NewTokenCallback } from "../global";
+import { ConfigPath, NewTokenData, Scope } from "../global";
 import urlEncode from "urlencode";
 import express from "express";
 import { encode } from "js-base64";
@@ -7,7 +7,7 @@ import axios from "axios";
 import open from "open";
 import http from "http";
 
-export class SpotifyConnect {
+class SpotifyConnect {
   /**
    *
    * @param {string} client_id When you register your application, Spotify provides you a Client ID
@@ -17,7 +17,7 @@ export class SpotifyConnect {
    * @param {object} config You need to enter the current port of your running server. You can enter your route. Default path: "/callback"
    * @example
    * {
-   *    port: 4000,
+   *    port: 8888,
    *    path: "/callback"
    * }
    *
@@ -33,7 +33,7 @@ export class SpotifyConnect {
     process.env.CLIENT_ID = client_id;
     process.env.PORT = config?.port.toString()! || "8888";
     process.env.CLIENT_SECRET = client_secret;
-    process.env.REDIRECT_URI = `http://localhost:${config.port}${
+    process.env.REDIRECT_URI = `http://localhost:${config?.port || 8888}${
       config.path && config.path?.length! > 0 ? config.path : "/callback"
     }`;
     if (scope instanceof Array) {
@@ -42,7 +42,15 @@ export class SpotifyConnect {
     return process.env.REDIRECT_URI;
   }
 
-  async spotifyAuthorize() {
+  async spotifyAuthorize(
+    AuthCallback: (
+      AuthData: Pick<
+        NewTokenData,
+        "access_token" | "refresh_token" | "expires_in"
+      >
+    ) => void
+  ) {
+    process.env.AUTH = undefined;
     const encodedRedirectUri = urlEncode(process.env.REDIRECT_URI!);
     const encodedClient = encode(
       `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`
@@ -57,7 +65,7 @@ export class SpotifyConnect {
     }
     let ENDPOINT = `https://accounts.spotify.com/authorize?client_id=${process.env.CLIENT_ID}&scopes=${scopes}&response_type=code&redirect_uri=${encodedRedirectUri}`;
     await open(ENDPOINT);
-    app.get("/callback", async (req, res) => {
+    app.use("/callback", async (req, res) => {
       let accessCode = req.url.split("=")[1];
       if (accessCode.length > 40 && !accessCode.includes("undefined")) {
         let { data } = await axios.post(
@@ -73,19 +81,22 @@ export class SpotifyConnect {
         process.env.AUTH = JSON.stringify(data);
         process.env.ACCESS_TOKEN = data.access_token;
         res.set("Content-Type", "text/html");
-        res.send(
-          Buffer.from(`<div>
+        res
+          .send(
+            Buffer.from(`<div>
           <h2> This is important data, please save it somewhere:</h2>
           <p><b>access_token:</b> ${data?.access_token}</p>
           <p><b>expires_in:</b> ${data?.expires_in} 1hr</p>
           <p><b>refresh_token:</b> ${data?.refresh_token}</p>
           </div>`)
-        );
+          )
+          .on("finish", () => {
+            AuthCallback(data);
+          });
       }
     });
+    // app.get("/callback",});
     server.listen(+process.env.PORT!);
-    server.close();
-    return JSON.parse(process.env.AUTH!);
   }
 
   /**
@@ -125,3 +136,5 @@ export class SpotifyConnect {
       }, 3550 * 1000);
   }
 }
+
+export default SpotifyConnect;
